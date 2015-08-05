@@ -151,12 +151,6 @@ public:
   // Destructor
 
 
-   bool write_ebf(const string, 
-		  const string); // write torus details to ebf file
-   bool read_ebf (const string, 
-		  const string); // read torus details from ebf file
-
-
    double       energy  () const { return E; }
    double       fsample () const { return Fs; }
    Actions      actions () const { return J; }

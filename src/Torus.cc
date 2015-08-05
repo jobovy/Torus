@@ -15,7 +15,6 @@
 #include "Point_ClosedOrbitCheby.h"
 #include "Toy_Isochrone.h"
 //#include "Compress.h"
-#include "ebf.hpp"
 #include "Numerics.h"
 #include <cmath>
 
@@ -115,117 +114,6 @@ void Torus::show(ostream& out) const
     out <<"\n log|dSn/dJp|           : ";
 	AM.dSdJ3().write_log(out);	
 }
-
-bool Torus::write_ebf(const string filename, const string torusname) 
-{
-  if(ebf::ContainsKey(filename,"/"+torusname)) { return false; }
-
-  int NPTp = PT->NumberofParameters();
-  double *PTp;
-  if(NPTp) {
-    PTp = new double[NPTp];
-    PT->parameters(PTp);
-  } else {
-    PTp = new double[2]; // just to give myself something to delete
-  }
-  //vec6 PTp = PT->parameters();  
-  vec4 TMp = TM->parameters();
-  int nSn = GF.NumberofParameters();
-  int n1_tmp[nSn], n2_tmp[nSn];
-  double Sn_tmp[nSn], dSn1[nSn], dSn2[nSn], dSn3[nSn];
-  for(int i=0;i!=nSn;i++) {
-    n1_tmp[i] = GF.n1(i); 
-    n2_tmp[i] = GF.n2(i); 
-    Sn_tmp[i] = GF.coeff(i); 
-    dSn1[i]   = AM.dSdJ1(i);
-    dSn2[i]   = AM.dSdJ2(i);
-    dSn3[i]   = AM.dSdJ3(i);
-  }
-
-  ebf::Write(filename,"/"+torusname+"/actions",&J[0],"a","",J.NumberofTerms());
-  ebf::Write(filename,"/"+torusname+"/df",&Fs,"a","",1);
-  ebf::Write(filename,"/"+torusname+"/E",&E,"a","",1);
-  ebf::Write(filename,"/"+torusname+"/Rmin",&Rmin,"a","",1);
-  ebf::Write(filename,"/"+torusname+"/Rmax",&Rmax,"a","",1);
-  ebf::Write(filename,"/"+torusname+"/zmax",&zmax,"a","",1);
-  ebf::Write(filename,"/"+torusname+"/frequencies",
-	     &Om[0],"a","",Om.NumberofTerms());
-  ebf::Write(filename,"/"+torusname+"/errors",&dc[0],"a","",
-	     dc.NumberofTerms());
-  
-  // Where there is the possibility of alternatives, subdirectories
-  if(NPTp)
-    ebf::Write(filename,"/"+torusname+"/pointtransform/shellorbit",
-	       &PTp[0],"a","",NPTp);
-  ebf::Write(filename,"/"+torusname+"/toymap/isochrone",
-	     &TMp[0],"a","",TMp.NumberofTerms());
-  ebf::Write(filename,"/"+torusname+"/generatingfunction/N1",
-	     &n1_tmp[0],"a","",nSn);
-  ebf::Write(filename,"/"+torusname+"/generatingfunction/N2",
-	     &n2_tmp[0],"a","",nSn);
-  ebf::Write(filename,"/"+torusname+"/generatingfunction/Sn",
-	     &Sn_tmp[0],"a","",nSn);
-  ebf::Write(filename,"/"+torusname+"/anglemap/dSndJ1",&dSn1[0],"a","",nSn);
-  ebf::Write(filename,"/"+torusname+"/anglemap/dSndJ2",&dSn2[0],"a","",nSn);
-  ebf::Write(filename,"/"+torusname+"/anglemap/dSndJ3",&dSn3[0],"a","",nSn);
-  delete[] PTp;
-  return true;
-}
-
-bool Torus::read_ebf(const string filename, const string torusname) {
-  ebf::EbfDataInfo dinfo;
-  double *PP;
-  vec4 TMp; 
-  bool got_PT=false;
-  // Read data
-  if(ebf::ContainsKey(filename,"/"+torusname+"/actions")) {
-    // one can allocate memory as y1=(double *)malloc(dinfo.elements*8)
-    ebf::Read(filename,"/"+torusname+"/actions", &J[0],J.NumberofTerms());
-    ebf::Read(filename,"/"+torusname+"/df",&Fs,1);
-    ebf::Read(filename,"/"+torusname+"/E",&E,1);
-    ebf::Read(filename,"/"+torusname+"/Rmin",&Rmin,1);
-    ebf::Read(filename,"/"+torusname+"/Rmax",&Rmax,1);
-    ebf::Read(filename,"/"+torusname+"/zmax",&zmax,1);
-    ebf::Read(filename,"/"+torusname+"/frequencies",&Om[0],Om.NumberofTerms());
-    ebf::Read(filename,"/"+torusname+"/errors",&dc[0],dc.NumberofTerms());
-    if(ebf::ContainsKey(filename,"/"+torusname+"/pointtransform/shellorbit",
-			dinfo)) { 
-      got_PT = true;
-      PP = new double[dinfo.elements];
-      ebf::Read(filename,"/"+torusname+"/pointtransform/shellorbit",
-		&PP[0],dinfo.elements);
-    } else PP = new double[2];
-    //GenPar::read(int *N1in, int *N2in, double *Snin, short newtot)
-    // only one choice of toymap for now, so leave that be
-    ebf::Read(filename,"/"+torusname+"/toymap/isochrone",
-	      &TMp[0],TMp.NumberofTerms());
-    ebf::ContainsKey(filename,"/"+torusname+"/generatingfunction/N1",dinfo);
-    int nSn = dinfo.elements;
-    int n1_tmp[nSn], n2_tmp[nSn];
-    double Sn_tmp[nSn], dSn1[nSn], dSn2[nSn], dSn3[nSn];
-    ebf::Read(filename,"/"+torusname+"/generatingfunction/N1",&n1_tmp[0],nSn);
-    ebf::Read(filename,"/"+torusname+"/generatingfunction/N2",&n2_tmp[0],nSn);
-    ebf::Read(filename,"/"+torusname+"/generatingfunction/Sn",&Sn_tmp[0],nSn);
-    ebf::Read(filename,"/"+torusname+"/anglemap/dSndJ1",&dSn1[0],nSn);
-    ebf::Read(filename,"/"+torusname+"/anglemap/dSndJ2",&dSn2[0],nSn);
-    ebf::Read(filename,"/"+torusname+"/anglemap/dSndJ3",&dSn3[0],nSn);
-    GenPar SN,S1,S2,S3;
-    SN.read(n1_tmp,n2_tmp,Sn_tmp,nSn);
-    S1.read(n1_tmp,n2_tmp,dSn1,nSn);
-    S2.read(n1_tmp,n2_tmp,dSn2,nSn);
-    S3.read(n1_tmp,n2_tmp,dSn3,nSn);
-    AngPar AP(S1,S2,S3);
-    if(got_PT)
-      SetMaps(PP,TMp,SN,AP);
-    else
-      SetMaps(TMp,SN,AP);
-
-    delete[] PP;
-    return true;
-  } else return false;
-  
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // Deletes all |Sn| < a*|max_Sn|, creates new terms around all |Sn| > b*|max_Sn|

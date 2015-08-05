@@ -35,7 +35,6 @@ Numerics_templates = $(INCL)Numerics.templates $(Matrix_h)
 Numerics_h	   = $(INCL)Numerics.h $(Matrix_h) $(Pi_h) $(Numerics_templates)
 Pspline_h	   = $(INCL)Pspline.h $(FreeMemory_h) $(Numerics_h)
 PJMNum_h	   = $(SRCUTILS)PJMNum.h 
-PJMebf_h	   = $(SRCUTILS)PJMebf.h 
 CHB_h		   = $(SRCUTILS)CHB.h
 
 AUXIL_H		   = $(Pi_h) $(Random_h) $(Compress_h)   \
@@ -119,13 +118,11 @@ $(OBJ)PJMNum.o:	$(SRCUTILS)PJMNum.cc $(PJMNum_h)
 		$(CPP) $(CFLAGS) $< ; $(AROTHER)
 $(OBJ)PJMCoords.o:	$(SRCUTILS)PJMCoords.cc $(PJMCoords_h) $(Pi_h)
 	$(CPP) $(CFLAGS) $< ; $(AROTHER)
-$(OBJ)PJMebf.o:	$(SRCUTILS)PJMebf.cc $(PJMebf_h)
-		$(CPP) $(CFLAGS) $< ; $(AROTHER)
 $(OBJ)Err.o:	       $(SRCUTILS)Err.cc $(Err_h)
 		       $(CPP) $(CFLAGS) $(SRCUTILS)Err.cc; $(ARTOR)
 
 
-Other:	$(OBJ)PJMNum.o $(OBJ)CHB.o $(OBJ)PJMCoords.o $(OBJ)PJMebf.o $(OBJ)Err.o
+Other:	$(OBJ)PJMNum.o $(OBJ)CHB.o $(OBJ)PJMCoords.o $(OBJ)Err.o
 
 
 
