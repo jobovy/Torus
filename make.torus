@@ -178,48 +178,5 @@ GalPot:	$(OBJ)falPot.o $(OBJ)MiyamotoNagaiPot.o $(OBJ)StackelPot.o $(OBJ)Isochro
 
 MAIN_LIBS:	Library TorFit GalPot Other
 
-################################################################################
-#
-# executables: standard version
-#
-testfalPot:	$(EXE)testfalPot.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LPOT)
-testMultiPot:	$(EXE)testMultiPot.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LPOT)
-GiveListProps:	$(EXE)GiveListProps.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-AUTOTORUS:	$(EXE)AUTOTORUS.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-AUTOTORI:	$(EXE)AUTOTORI.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-READLIST:	$(EXE)READLIST.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-Choose_any_df:	$(EXE)Choose_any_df.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-Create_DF_tori:	$(EXE)Create_DF_tori.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-Sample_list_limits:	$(EXE)Sample_list_limits.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-Orbit_basic:	$(EXE)Orbit_basic.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-Coord_converter:	$(EXE)Coord_converter.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-Add_Uncert:	$(EXE)Add_Uncert.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-CompareTorusIntegrated:	$(EXE)CompareTorusIntegrated.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-
-CompareTorusIntegrated_SOS:	$(EXE)CompareTorusIntegrated_SOS.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-SmoothStreamMaker:	$(EXE)SmoothStreamMaker.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-GridAndGrid:	$(EXE)GridAndGrid.cc MAIN_LIBS
-		$(CPP) $(MFLAGS) $(EXE)$@.cc $(LDFLAGS)
-
-
-mains: Library TorFit GalPot Other testfalPot GiveListProps AUTOTORUS \
-       AUTOTORI READLIST Choose_any_df Create_DF_tori \
-       Sample_list_limits Orbit_basic Coord_converter Add_Uncert \
-       SmoothStreamMaker GridAndGrid CompareTorusIntegrated \
-       CompareTorusIntegrated_SOS testMultiPot 
+mains: Library TorFit GalPot Other
 
