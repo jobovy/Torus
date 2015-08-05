@@ -29,7 +29,9 @@ EBFINC		= ../libebf_c_cpp-0.0.3/include/
 EBFLIB		= ../libebf_c_cpp-0.0.3/lib/ 
 
 # Compiler
-CPP	= g++
+ifeq ($(CPP),)
+        CPP= g++
+endif
 
 # flags for compiler for optimized & debug code
 CFLAGS 	= -c -o $@ -O3 -ffast-math -I$(INC) -I$(SRCPOT) -I$(SRCUTILS) -I$(EBFINC)
