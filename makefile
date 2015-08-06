@@ -29,8 +29,10 @@ EBFINC		= ../libebf_c_cpp-0.0.3/include/
 EBFLIB		= ../libebf_c_cpp-0.0.3/lib/ 
 
 # Compiler
-ifeq ($(CPP),)
+ifeq ($(CXX),)
         CPP= g++
+else
+	CPP= $(CXX)
 endif
 
 # flags for compiler for optimized & debug code
