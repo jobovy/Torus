@@ -18,7 +18,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "Pi.h"
-#include "WDMath.h"
+#include <cmath>
 #include "Numerics.templates"
 
 ////////////////////////////////////////////////////////////////////////////////

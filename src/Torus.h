@@ -31,7 +31,8 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "Potential.h"
-#include "PJMCoords.h"
+typedef Vector<double,6> GCY;
+//#include "PJMCoords.h"
 #include "Fit.h"
 
 /**
