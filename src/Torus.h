@@ -53,7 +53,7 @@ can fit the corresponding Torus. Once this is done the whole orbit is known.
 
 The normal fitting procedure is:
 
-1) Member function AutoTorus chooses plausible values for the
+1) Member function SetTopPot chooses plausible values for the
 parameters of ToyIsochrone, and sets up original parameters of GenFnc
 and AngMap (an object of class GenPar) via the function MakeGeneric (a
 member function of GenPar).
@@ -144,9 +144,13 @@ private:
 
 
 public:
-    Torus();
+	Torus();
+	Torus(double);
     Torus(const Torus&);
-    Torus&	 operator= (const Torus&);
+    Torus&	operator= (const Torus&);
+    Torus&	operator*= (const double&);
+    Torus&	operator+= (const Torus&);
+    const Torus operator* (const double&);
   // Constructors
    ~Torus() { DelMaps(); }
   // Destructor
@@ -402,6 +406,98 @@ in the given */
 // used as initial guess and are changed in order to fit the torus in the given
 // potential.
 
+    int          AutoFit_TPfirst  	   (Actions,              // Actions
+				    Potential*,		  // galactic potential
+				    const double  =0.003, // goal for |dJ|/|J|
+				    const int     =600,   // max. number of Sn
+				    const int     =150,	  // max. iterations
+				    const int     =12,    // max. SN tailorings 
+				    const int     =3,	  // overdetermination
+				    const int     =16,	  // min. # of cells
+							  //	for angle fit
+				    const int     =200,   // max. # of steps
+							  //    on av. per cell
+				    const int     =12,    // min. # of theta
+							  //    per dim 
+				    const int     =0);	  // error output?
+// performs a complete fit: Actions are fixed while the torus parameters are
+// used as initial guess and are changed in order to fit the torus in the given
+// potential.
+// 
+// In this case we use the strategy of fitting the toy potential parameters first
+// then only varying the generating function
+
+
+    int          AutoFit_SNfirst  	   (Actions,              // Actions
+				    Potential*,		  // galactic potential
+				    const double  =0.003, // goal for |dJ|/|J|
+				    const int     =600,   // max. number of Sn
+				    const int     =150,	  // max. iterations
+				    const int     =12,    // max. SN tailorings 
+				    const int     =3,	  // overdetermination
+				    const int     =16,	  // min. # of cells
+							  //	for angle fit
+				    const int     =200,   // max. # of steps
+							  //    on av. per cell
+				    const int     =12,    // min. # of theta
+							  //    per dim 
+				    const int     =0);	  // error output?
+// performs a complete fit: Actions are fixed while the torus parameters are
+// used as initial guess and are changed in order to fit the torus in the given
+// potential.
+// 
+// In this case we use the strategy of fitting the low order terms in the generating 
+// function first then varying both the toy potential and the generating function 
+// (including higher order terms)
+
+
+    int          AutoFit_LowJzonly (Actions,              // Actions
+				    Potential*,		  // galactic potential
+				    const double  =0.003, // goal for |dJ|/|J|
+				    const int     =600,   // max. number of Sn
+				    const int     =150,	  // max. iterations
+				    const int     =12,    // max. SN tailorings 
+				    const int     =3,	  // overdetermination
+				    const int     =16,	  // min. # of cells
+							  //	for angle fit
+				    const int     =200,   // max. # of steps
+							  //    on av. per cell
+				    const int     =12,    // min. # of theta
+							  //    per dim 
+				    const int     =0);	  // error output?
+// performs a complete fit: Actions are fixed while the torus parameters are
+// used as initial guess and are changed in order to fit the torus in the given
+// potential.
+// 
+// In this case we use the strategy of fitting the low order terms in the generating 
+// function first then varying both the toy potential and the generating function 
+// (including higher order terms)
+
+
+    int      FitWithFixToyPot  	   (Actions,              // Actions
+				    vec4,               // Toy parameters
+				    Potential*,		  // galactic potential
+				    const double  =0.001, // goal for |dJ|/|J|
+				    const int     =700,   // max. number of Sn
+				    const int     =200,	  // max. iterations
+				    const int     =14,    // max. SN tailorings 
+				    const int     =3,	  // overdetermination
+				    const int     =24,	  // min. # of cells
+							  //	for angle fit
+				    const int     =200,   // max. # of steps
+							  //    on av. per cell
+				    const int     =24,    // min. # of theta
+							  //    per dim 
+				    const int     =0, 	  // error output?
+				    const bool    =false);//spherical potential?
+// performs a complete fit: Actions and toy parameters are fixed while the
+// other torus parameters are used as initial guess and are changed in order
+// to fit the torus in the given potential.
+//
+// Most useful when looking to interpolate between tori.
+
+
+    
 
  /*    int          ManualHalfFit   (Potential*,  // galactic potential */
 /* 			    const double  =0.001, // goal for |dJ|/|J| */
@@ -416,7 +512,7 @@ in the given */
 
     double     check              (Potential*);           // dH/H
  
-    void  AutoTorus               (Potential*,            // galactic potential
+    void  SetToyPot               (Potential*,            // galactic potential
 				   const Actions,         // Actions to fit
 				   const double=0 );      // Scale radius
 
@@ -430,6 +526,8 @@ in the given */
 // **************************** inline functions **************************** //
 
 inline Torus::Torus() : J(0.), E(0.), Fs(0.), Om(0.), dc(0.), PT(0), TM(0) {}
+
+inline Torus::Torus(double x) : J(0.), E(0.), Fs(0.), Om(0.), dc(0.), PT(0), TM(0) {}
 
 inline Torus::Torus(const Torus& T)
     : PhaseSpaceMap(), J(T.J), E(T.E), Fs(T.Fs), Om(T.Om), dc(T.dc)
@@ -550,13 +648,8 @@ inline double Torus::DToverDt(		// return: 	|d(Tr,Tt)/d(tr,tt)|
 inline GCY Torus::FullMap(const Angles& A) const
 {
     GCY  gcy;
-    PSPD qp = PSPD(J(0),J(1),A(0),A(1)) >> AM >> GF >> (*TM) >> (*PT);
-    gcy[0] = qp(0);		// R
-    gcy[1] = qp(1);		// z
-    gcy[2] = A(2);		// phi
-    gcy[3] = qp(2);		// vR   = pR
-    gcy[4] = qp(3);		// vz   = pz
-    gcy[5] = J(2)/qp(0);	// vphi = Lz/R
+    PSPT qp = PSPT(J(0),J(1),J(2),A(0),A(1),A(2)) >> AM >> GF >> (*TM) >> (*PT);
+    for(int i=0;i!=6;i++) gcy[i] = qp[i];
     return gcy;
 }
 
@@ -938,13 +1031,19 @@ inline int Torus::AutoFit(Actions Jin, Potential *Phi, const double tol,
 			  const int ipc, const int Nth, const int err)
 {
   J = Jin;
-  AutoTorus(Phi,Jin);
+  SetToyPot(Phi,Jin);
+  // show(cerr);
   register int F;
   GenPar SN=GF.parameters();
   AngPar AP=AM.parameters();
   F = AllFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
-	       Om,E,dc,0,false,Nta,ipc,E,Nth,err); 
-  if(F && J(1)<0.005*J(0)) {
+	       Om,E,dc,0,0,Nta,ipc,E,Nth,err); 
+
+  double JzFactor = 0.5 * 
+    (1 + tanh( (J(0)-0.5*fabs(J(2))) / (0.25*fabs(J(2)) ) ) ) ;
+  double LowJzFitParam = 0.005 + 0.05*JzFactor;
+
+   if(F && (J(1)<LowJzFitParam*J(0)) ) {
     Frequencies tmpOm = Om; double tmpE = E; Errors tmpdc = dc;
     vec4 tmpIP = TM->parameters();
     GenPar tmpSN = SN; AngPar tmpAP = AP; int oF = F;
@@ -980,6 +1079,174 @@ inline int Torus::AutoFit(Actions Jin, Potential *Phi, const double tol,
 
     return F;
 }
+
+
+inline int Torus::AutoFit_TPfirst(Actions Jin, Potential *Phi, const double tol, 
+				  const int Max, const int Mit, const int Nta, 
+				  const int Over, const int Ncl,
+				  const int ipc, const int Nth, const int err)
+{
+  J = Jin;
+  SetToyPot(Phi,Jin);
+  // show(cerr);
+  register int F;
+  GenPar SN=GF.parameters();
+  AngPar AP=AM.parameters();
+  F = AllFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+	       Om,E,dc,0,1,Nta,ipc,E,Nth,err); 
+  double JzFactor = 0.5 * 
+    (1 + tanh( (J(0)-0.5*fabs(J(2))) / (0.25*fabs(J(2)) ) ) ) ;
+  double LowJzFitParam = 0.005 + 0.05*JzFactor;
+
+  if(F && (J(1)<LowJzFitParam*J(0)) ) {
+    Frequencies tmpOm = Om; double tmpE = E; Errors tmpdc = dc;
+    vec4 tmpIP = TM->parameters();
+    GenPar tmpSN = SN; AngPar tmpAP = AP; int oF = F;
+    SN=GF.parameters();
+    F = LowJzFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+		 Om,E,dc,0,Nta,ipc,E,Nth,err);
+    if(F && ((dc(0) > tmpdc(0) && oF!=-4 && oF!=-1) || (F==-4 || F== -1))) { 
+      Om = tmpOm; E = tmpE; dc = tmpdc; SN = tmpSN; AP = tmpAP; 
+      TM->set_parameters(tmpIP); F=oF;
+    }
+  }
+  
+  if(F && J(0)<0.05*J(1)) { // possibly something with number of terms used
+    Frequencies tmpOm = Om; double tmpE = E; Errors tmpdc = dc;
+    vec4 tmpIP = TM->parameters();
+    GenPar tmpSN = SN; AngPar tmpAP = AP; int oF = F;
+    SN=GF.parameters();
+    if(err) cerr << "using AutoPTTorus\n";
+    AutoPTTorus(Phi,J,3.);
+    if(err) cerr << "using PTFit\n";
+    F = PTFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+	      Om,E,dc,0,Nta,ipc,E,Nth,err);
+    if(F && ((dc(0) > tmpdc(0) && oF!=-4 && oF!=-1) ||
+	     ((F==-4 && oF!=-1) || F== -1))) {
+      Om = tmpOm; E = tmpE; dc = tmpdc; SN = tmpSN; AP = tmpAP;
+      TM->set_parameters(tmpIP); F=oF; SetPP();
+    }
+  }
+    GF.set_parameters(SN);
+    AM.set_parameters(AP);
+
+    FindLimits();
+
+    return F;
+}
+
+
+inline int Torus::AutoFit_SNfirst(Actions Jin, Potential *Phi, const double tol, 
+				  const int Max, const int Mit, const int Nta, 
+				  const int Over, const int Ncl,
+				  const int ipc, const int Nth, const int err)
+{
+  J = Jin;
+  SetToyPot(Phi,Jin);
+  // show(cerr);
+  register int F;
+  GenPar SN=GF.parameters();
+  AngPar AP=AM.parameters();
+
+
+  F = AllFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+	     Om,E,dc,0,2,Nta,ipc,E,Nth,err);
+  double JzFactor = 0.5 * 
+    (1 + tanh( (J(0)-0.5*fabs(J(2))) / (0.25*fabs(J(2)) ) ) ) ;
+  double LowJzFitParam = 0.005 + 0.05*JzFactor;
+ 
+   if(F && (J(1)<LowJzFitParam*J(0)) ) {
+    
+    Frequencies tmpOm = Om; double tmpE = E; Errors tmpdc = dc;
+    vec4 tmpIP = TM->parameters();
+    GenPar tmpSN = SN; AngPar tmpAP = AP; int oF = F;
+    SN=GF.parameters();
+    SetToyPot(Phi,Jin);
+    F = LowJzFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+		 Om,E,dc,0,Nta,ipc,E,Nth,err);
+    if(F && ((dc(0) > tmpdc(0) && oF!=-4 && oF!=-1) || (F==-4 || F== -1))) {
+      Om = tmpOm; E = tmpE; dc = tmpdc; SN = tmpSN; AP = tmpAP;
+      TM->set_parameters(tmpIP); F=oF;
+    }
+  }
+  
+  if(F && J(0)<0.05*J(1)) { // possibly something with number of terms used
+    Frequencies tmpOm = Om; double tmpE = E; Errors tmpdc = dc;
+    vec4 tmpIP = TM->parameters();
+    GenPar tmpSN = SN; AngPar tmpAP = AP; int oF = F;
+    SN=GF.parameters();
+    if(err) cerr << "using AutoPTTorus\n";
+    AutoPTTorus(Phi,J,3.);
+    if(err) cerr << "using PTFit\n";
+    F = PTFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+	      Om,E,dc,0,Nta,ipc,E,Nth,err);
+    if(F && ((dc(0) > tmpdc(0) && oF!=-4 && oF!=-1) ||
+	     ((F==-4 && oF!=-1) || F== -1))) {
+      Om = tmpOm; E = tmpE; dc = tmpdc; SN = tmpSN; AP = tmpAP;
+      TM->set_parameters(tmpIP); F=oF; SetPP();
+    }
+  }
+    GF.set_parameters(SN);
+    AM.set_parameters(AP);
+
+    FindLimits();
+
+    return F;
+}
+
+
+inline int Torus::AutoFit_LowJzonly(Actions Jin, Potential *Phi, const double tol, 
+				  const int Max, const int Mit, const int Nta, 
+				  const int Over, const int Ncl,
+				  const int ipc, const int Nth, const int err)
+{
+  J = Jin;
+  SetToyPot(Phi,Jin);
+  // show(cerr);
+  register int F;
+  GenPar SN=GF.parameters();
+  AngPar AP=AM.parameters();
+
+    F = LowJzFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+		 Om,E,dc,0,Nta,ipc,E,Nth,err);
+
+    GF.set_parameters(SN);
+    AM.set_parameters(AP);
+
+    FindLimits();
+
+    return F;
+}
+
+
+
+inline int Torus::FitWithFixToyPot(Actions Jin, vec4 TPin,
+			   Potential *Phi, const double tol, 
+			   const int Max, const int Mit, const int Nta, 
+			   const int Over, const int Ncl,
+			   const int ipc, const int Nth, const int err, 
+			   const bool sph_pot)
+{
+  J = Jin;
+  SetToyPot(Phi,Jin);
+  TM->set_parameters(TPin);
+  //  cerr << TP() << '\n';
+  register int F;
+  GenPar SN=GF.parameters();
+  AngPar AP=AM.parameters();
+ 
+  F = ToySetFit(J,Phi,tol,Max,Mit,Over,Ncl,*PT,*TM,SN,AP,
+		Om,E,dc,
+		Nta,ipc,E,Nth,err,false); 
+  
+  GF.set_parameters(SN);
+  AM.set_parameters(AP);
+
+  FindLimits();
+  
+  return F;
+}
+
 
 
 
@@ -1061,5 +1328,8 @@ inline double Torus::check(Potential *Phi) {
   }
   return dH;
 }
+
+Torus InterpTorus(Torus ***Tgrid,Actions Jbar,Actions dJ,Actions J);
+
 
 #endif

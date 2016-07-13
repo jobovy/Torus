@@ -149,6 +149,8 @@ $(OBJ)Torus.o:	 $(SRC)Torus.cc $(Torus_h) $(PointTrans_h) $(Toy_Isochrone_h) \
 TorFit:	$(OBJ)Fit.o $(OBJ)GeneratingFunction.o 	$(OBJ)Point_ClosedOrbitCheby.o \
 	$(OBJ)Toy_Isochrone.o $(OBJ)Orb.o $(OBJ)Point_None.o $(OBJ)Torus.o
 
+$(OBJ)PassMyGrids.o:	 $(SRC)PassMyGrids.cc $(PassMyGrids_h)
+		 $(CPP) $(CFLAGS) $(SRC)PassMyGrids.cc; $(ARTOR)
 
 
 ################################################################################
